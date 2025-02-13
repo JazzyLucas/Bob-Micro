@@ -1,0 +1,6 @@
+@Bob_Micro_HostAddress = http://localhost:5187
+
+GET {{Bob_Micro_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
