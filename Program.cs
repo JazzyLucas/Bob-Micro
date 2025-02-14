@@ -1,9 +1,8 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
@@ -17,28 +16,33 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
+app.MapGet("/api/message", async (HttpClient httpClient) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    var response = await httpClient.GetStringAsync("http://localhost:5000/api/receive");
+    return Results.Json(new { Message = $"Received response: {response}" });
+}).WithName("GetMessage");
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.MapGet("/", () => Results.Content("""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Success</title>
+        <script>
+            async function callApi() {
+                const response = await fetch('/api/message');
+                const data = await response.json();
+                document.getElementById('result').innerText = data.Message;
+            }
+        </script>
+    </head>
+    <body>
+        <h1>Success!</h1>
+        <button onclick="window.location.href='/swagger'">Go to Swagger UI</button>
+        <button onclick="callApi()">Call Bob-Micro API</button>
+        <p id="result"></p>
+    </body>
+    </html>
+    """, "text/html"))
+   .WithName("GetRoot");
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
