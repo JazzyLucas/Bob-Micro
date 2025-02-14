@@ -5,12 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "C#: Bob-Micro Debug",
-            "type": "dotnet",
-            "request": "launch",
-            "projectPath": "${workspaceFolder}/Bob-Micro.csproj"
-        },
-        {
             "name": ".NET Core Launch (web)",
             "type": "coreclr",
             "request": "launch",
